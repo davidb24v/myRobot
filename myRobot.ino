@@ -174,7 +174,6 @@ void rest_mode() {
 void scan_mode() {
   LEDinterval = 100;
   pingTimer = headingTimer = millis();
-  Serial.println("FAST SCANNING MODE SELECTED");
 }
 
 void echoCheck() { // Timer2 interrupt calls this function every 24uS where you can check the ping status.
