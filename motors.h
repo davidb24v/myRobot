@@ -18,7 +18,8 @@
 #define PWM_rf 11
 
 // PWM values
-byte PWMlr=200, PWMlf=200, PWMrr = 200, PWMrf=200;
+#define INIT_PWM 150
+byte PWMlr=INIT_PWM, PWMlf=INIT_PWM, PWMrr = INIT_PWM, PWMrf=INIT_PWM;
 
 // Current values for each motor
 byte LEFT = 0;
@@ -42,8 +43,6 @@ void setup_motors() {
 }
 
 void writeLeft() {
-//Serial.print("writeLeft ");
-//Serial.println(LEFT, DEC);
   Wire.beginTransmission(0x20);
   Wire.write(0x12);
   Wire.write(LEFT);
@@ -51,8 +50,6 @@ void writeLeft() {
 }
 
 void writeRight() {
-//Serial.print("writeRight ");
-//Serial.println(RIGHT, DEC);
   Wire.beginTransmission(0x20);
   Wire.write(0x13);
   Wire.write(RIGHT);
@@ -60,10 +57,6 @@ void writeRight() {
 }  
 
 void writeBoth() {
-//Serial.print("writeBoth LEFT=");
-//Serial.print(LEFT, DEC);
-//Serial.print(" RIGHT=");
-//Serial.println(RIGHT, DEC);
   Wire.beginTransmission(0x20);
   Wire.write(0x12);
   Wire.write(LEFT);
@@ -211,7 +204,24 @@ void bplus() {
   lplus(); rplus();
 }
 
-void bpeq() {
+void beq() {
    int newval = (PWMlr + PWMlf + PWMrr + PWMrf)/4;
    PWMlr = PWMlf = PWMrr = PWMrf = newval;
 }
+
+void lset() {
+  byte b;
+  b = Serial.read();
+  PWMlr = PWMlf = (int) b;
+}
+void rset() {
+  byte b;
+  b = Serial.read();
+  PWMrr = PWMrf = (int) b;
+}
+void bset() {
+  byte b;
+  b = Serial.read();
+  PWMrr = PWMrf = PWMlr = PWMlf = (int) b;
+}
+

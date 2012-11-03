@@ -10,5 +10,20 @@ It's using a DFRobot Pirate 4WD Mobile Platform, wasn't sure if I could
 run this off a single TB6612FNG so I went ahead and used 2 anyway. That's
 why there's a MCP23017 in the mix too.
 
- 
- 
+Requires:
+
+1) Ruben Laguna's Arduino Library for Hmc6352
+http://rubenlaguna.com/wp/2009/03/19/arduino-library-for-hmc6352/index.html/
+
+2) Tim Eckel's NewPing Library
+http://code.google.com/p/arduino-new-ping/
+
+3) hacktronics Arduino 1-Wire Tutorial for DS18B20
+http://www.hacktronics.com/Tutorials/arduino-1-wire-tutorial.html
+
+4) bildr tutorial on the SparkFun TB6612FNG breakout
+http://bildr.org/2012/04/tb6612fng-arduino/
+
+5) John Boxall's tutorial on the MCP23017
+http://tronixstuff.wordpress.com/2011/08/26/tutorial-maximising-your-arduinos-io-ports/
+

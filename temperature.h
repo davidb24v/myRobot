@@ -14,8 +14,8 @@ DallasTemperature sensors(&oneWire);
 DeviceAddress Thermometer = { 0x28, 0x85, 0xC8, 0xAA, 0x03, 0x00, 0x00, 0x55 };
 
 // Flags relating to temperature data
-long TemperatureTimer;
-int TemperatureSpeed = 10011;
+long TemperatureTimer = 0;
+int TemperatureSpeed = 1000;
 
 void printTemperature() {
   sensors.requestTemperatures();

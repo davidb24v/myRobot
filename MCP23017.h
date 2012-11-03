@@ -1,7 +1,6 @@
 
 void setup_MCP23017() {
   // Configure the MCP23017
-  setup_MCP23017();
   Wire.beginTransmission(0x20);
   Wire.write(0x12);
   Wire.write(0x20); // use table 1.4 addressing

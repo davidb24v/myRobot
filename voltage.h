@@ -1,5 +1,5 @@
 // Voltage measurement
-unsigned long voltageTimer;
+unsigned long voltageTimer = 0;
 unsigned int voltageSpeed = 2500;
 long tsVoltage;
 
