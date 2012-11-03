@@ -111,7 +111,7 @@ void loop() {
   if ( millis()-lastContact > contactInterval) {
     lastContact = millis();
     bstop();
-    rest_mode();
+    idle_mode();
   }
 }
 
@@ -120,31 +120,31 @@ void process_command() {
   else if (command == "D") get_distance();       // query distance sensor
   else if (command == "V") get_voltage();        // query motor voltage
   else if (command == "T") get_temperature();    // query motor voltage
-  else if (command == "SCAN") scan_mode();       // Fast scanning distance/heading
-  else if (command == "REST") rest_mode();       // Idle mode
-  else if (command == "lforwards") lforwards();  //left forwards
-  else if (command == "rforwards") rforwards();  //right forwards
-  else if (command == "bforwards") bforwards();  //both forwards
-  else if (command == "lreverse") lreverse();    //
-  else if (command == "rreverse") rreverse();    // reverse
-  else if (command == "breverse") breverse();    //
-  else if (command == "lbrake") lbrake();        //
-  else if (command == "rbrake") rbrake();        // brake
-  else if (command == "bbrake") bbrake();        //
-  else if (command == "lstop") lstop();          //
-  else if (command == "rstop") rstop();          // stop
-  else if (command == "bstop") bstop();          //
-  else if (command == "rotateCW") rotateCW();    // rotate clockwise
-  else if (command == "rotateCCW") rotateCCW();  // rotate counter-clockwise
-  else if (command == "lplus") lplus();          // Add 5 to left PWM values
-  else if (command == "rplus") rplus();          //   to right
-  else if (command == "bplus") bplus();          //   to both
-  else if (command == "lminus") lminus();        // subtract 5 from left PWM
-  else if (command == "rminus") rminus();        //   from right
-  else if (command == "bminus") bminus();        //   from both
-  else if (command == "lset") lset();            // set left PWM
-  else if (command == "rset") rset();            // set right
-  else if (command == "bset") bset();            // set both
+  else if (command == "S") scan_mode();       // Fast scanning distance/heading
+  else if (command == "I") idle_mode();       // Idle mode
+  else if (command == "lf") lf();  //left forwards
+  else if (command == "rf") rf();  //right forwards
+  else if (command == "bf") bf();  //both forwards
+  else if (command == "lr") lreverse();    //
+  else if (command == "rr") rreverse();    // reverse
+  else if (command == "br") breverse();    //
+  else if (command == "lb") lbrake();	     //
+  else if (command == "rb") rbrake();	     // brake
+  else if (command == "bb") bbrake();	     //
+  else if (command == "ls") lstop();	      //
+  else if (command == "rs") rstop();	      // stop
+  else if (command == "bs") bstop();	      //
+  else if (command == "CW") rotateCW();    // rotate clockwise
+  else if (command == "CCW") rotateCCW();  // rotate counter-clockwise
+  else if (command == "lp") lplus();	      // Add 5 to left PWM values
+  else if (command == "rp") rplus();	      //   to right
+  else if (command == "bp") bplus();	      //   to both
+  else if (command == "lm=") lminus();        // subtract 5 from left PWM
+  else if (command == "rm ") rminus();        //   from right
+  else if (command == "bm ") bminus();        //   from both
+  else if (command == "ls") lset();	       // set left PWM
+  else if (command == "rs") rset();	       // set right
+  else if (command == "bs") bset();	       // set both
   else if (command == "beq") beq();              // make left and right PWM equal
 
   command = "";
@@ -166,7 +166,7 @@ void get_temperature() {
   printTemperature();
 }
 
-void rest_mode() {
+void idle_mode() {
   LEDinterval = 1000;
   pingTimer = headingTimer = 0;
 }
