@@ -18,7 +18,7 @@
 #define PWM_rf 11
 
 // PWM values
-#define INIT_PWM 75
+#define INIT_PWM 150
 byte PWMlr=INIT_PWM, PWMlf=INIT_PWM, PWMrr = INIT_PWM, PWMrf=INIT_PWM;
 
 // Current values for each motor

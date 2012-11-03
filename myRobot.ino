@@ -32,7 +32,8 @@ String command;
 // the setup routine runs once when you press reset:
 void setup() {
   
-  Serial.begin(115200);
+//  Serial.begin(115200);
+  Serial.begin(9600);
   
   setup_motors();
   
@@ -136,15 +137,15 @@ void process_command() {
   else if (command == "bs") bs();	      //
   else if (command == "CW") rotateCW();    // rotate clockwise
   else if (command == "CCW") rotateCCW();  // rotate counter-clockwise
-  else if (command == "lp") lp();	      // Add 5 to left PWM values
-  else if (command == "rp") rp();	      //   to right
-  else if (command == "bp") bp();	      //   to both
-  else if (command == "lm=") lm();        // subtract 5 from left PWM
-  else if (command == "rm ") rm();        //   from right
-  else if (command == "bm ") bm();        //   from both
-  else if (command == "ls") lset();	       // set left PWM
-  else if (command == "rs") rset();	       // set right
-  else if (command == "bs") bset();	       // set both
+  else if (command == "pl") lp();	      // Add 5 to left PWM values
+  else if (command == "pr") rp();	      //   to right
+  else if (command == "pb") bp();	      //   to both
+  else if (command == "ml=") lm();        // subtract 5 from left PWM
+  else if (command == "mr ") rm();        //   from right
+  else if (command == "mb ") bm();        //   from both
+  else if (command == "sl") lset();	       // set left PWM
+  else if (command == "sr") rset();	       // set right
+  else if (command == "sb") bset();	       // set both
   else if (command == "beq") beq();              // make left and right PWM equal
 
   command = "";
