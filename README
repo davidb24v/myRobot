@@ -1,0 +1,8 @@
+Arduino sketch to control an autonomous robot with a few sensors on board.
+
+ - HMC6352 Compass
+ - SR HC-04 Ultrasonic Sensor
+ - DS18B20 1-wire temperature sensor
+ - 2 x TB6612FNG motor drivers
+ 
+ 
