@@ -86,15 +86,15 @@ void loop() {
   // Check if any motors need stopping
   if ( StopMotors && millis() >= StopMotors ) {
     StopMotors = 0;
-    bstop();
+    bs();
   }
   if ( StopLeftMotor && millis() >= StopLeftMotor ) {
     StopLeftMotor = 0;
-    lstop();
+    ls();
   }
   if ( StopRightMotor > 0 && millis() >= StopRightMotor ) {
     StopRightMotor = 0;
-    rstop();
+    rs();
   }
   
   if (Serial.available() > 0) {
@@ -110,7 +110,7 @@ void loop() {
   // turn off if haven't heard from pi for a while...
   if ( millis()-lastContact > contactInterval) {
     lastContact = millis();
-    bstop();
+    bs();
     idle_mode();
   }
 }
@@ -125,23 +125,23 @@ void process_command() {
   else if (command == "lf") lf();  //left forwards
   else if (command == "rf") rf();  //right forwards
   else if (command == "bf") bf();  //both forwards
-  else if (command == "lr") lreverse();    //
-  else if (command == "rr") rreverse();    // reverse
-  else if (command == "br") breverse();    //
-  else if (command == "lb") lbrake();	     //
-  else if (command == "rb") rbrake();	     // brake
-  else if (command == "bb") bbrake();	     //
-  else if (command == "ls") lstop();	      //
-  else if (command == "rs") rstop();	      // stop
-  else if (command == "bs") bstop();	      //
+  else if (command == "lr") lr();    //
+  else if (command == "rr") rr();    // reverse
+  else if (command == "br") br();    //
+  else if (command == "lb") lb();	     //
+  else if (command == "rb") rb();	     // brake
+  else if (command == "bb") bb();	     //
+  else if (command == "ls") ls();	      //
+  else if (command == "rs") rs();	      // stop
+  else if (command == "bs") bs();	      //
   else if (command == "CW") rotateCW();    // rotate clockwise
   else if (command == "CCW") rotateCCW();  // rotate counter-clockwise
-  else if (command == "lp") lplus();	      // Add 5 to left PWM values
-  else if (command == "rp") rplus();	      //   to right
-  else if (command == "bp") bplus();	      //   to both
-  else if (command == "lm=") lminus();        // subtract 5 from left PWM
-  else if (command == "rm ") rminus();        //   from right
-  else if (command == "bm ") bminus();        //   from both
+  else if (command == "lp") lp();	      // Add 5 to left PWM values
+  else if (command == "rp") rp();	      //   to right
+  else if (command == "bp") bp();	      //   to both
+  else if (command == "lm=") lm();        // subtract 5 from left PWM
+  else if (command == "rm ") rm();        //   from right
+  else if (command == "bm ") bm();        //   from both
   else if (command == "ls") lset();	       // set left PWM
   else if (command == "rs") rset();	       // set right
   else if (command == "bs") bset();	       // set both

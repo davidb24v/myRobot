@@ -18,7 +18,7 @@
 #define PWM_rf 11
 
 // PWM values
-#define INIT_PWM 150
+#define INIT_PWM 75
 byte PWMlr=INIT_PWM, PWMlf=INIT_PWM, PWMrr = INIT_PWM, PWMrf=INIT_PWM;
 
 // Current values for each motor
@@ -64,77 +64,77 @@ void writeBoth() {
   Wire.endTransmission();
 }  
 
-void lforwards() {
+void lf() {
   // Set STBY, AIN1 and BIN1 - both wheels forwards
   LEFT = STBY | lAIN1 | lBIN1;
   writeLeft();
 }
 
-void lreverse() {
+void lr() {
   // Set STBY, AIN2 and BIN2 - both wheels reverse
   LEFT = STBY | lAIN2 | lBIN2;
   writeLeft();
 }
 
-void lstop() {
+void ls() {
   // Clear all and power off the driver board
   LEFT = 0;
   writeLeft();
 }
 
-void lbrake() {
+void lb() {
   // Set all motor bits to on
   LEFT = STBY | lAIN1 | lAIN2 | lBIN1 | lBIN2;
   writeLeft();
   StopLeftMotor = millis() + PWMlr + PWMlf;
 }
 
-void rforwards() {
+void rf() {
   // Set STBY, AIN1 and BIN1 - both wheels forwards
   RIGHT = STBY | rAIN1 | rBIN1;
   writeRight();
 }
 
-void rreverse() {
+void rr() {
   // Set STBY, AIN2 and BIN2 - both wheels reverse
   RIGHT = STBY | rAIN2 | rBIN2;
   writeRight();
 }
 
-void rstop() {
+void rs() {
   // Clear all and power down
   RIGHT = 0;
   writeRight();
 }
 
-void rbrake() {
+void rb() {
   // Set all motor bits to on
   RIGHT = STBY | rAIN1 | rAIN2 | rBIN1 | rBIN2;
   writeRight();
   StopRightMotor = millis() + PWMrr + PWMrf;
 }
 
-void bforwards() {
+void bf() {
   // Set STBY, AIN1 and BIN1 - both wheels forwards
   LEFT = STBY | lAIN1 | lBIN1;
   RIGHT = STBY | rAIN1 | rBIN1;
   writeBoth();
 }
 
-void breverse() {
+void br() {
   // Set STBY, AIN2 and BIN2 - both wheels reverse
   LEFT = STBY | lAIN2 | lBIN2;
   RIGHT = STBY | rAIN2 | rBIN2;
   writeBoth();
 }
 
-void bstop() {
+void bs() {
   // Clear all and power down
   LEFT = RIGHT = 0;
   writeBoth();
 }
 
-void bbrake() {
+void bb() {
   // Set all motor bits to on
   LEFT = STBY | lAIN1 | lAIN2 | lBIN1 | lBIN2;
   RIGHT = STBY | rAIN1 | rAIN2 | rBIN1 | rBIN2;
@@ -156,7 +156,7 @@ void rotateCCW() {
   
 // PWM values
 //byte PWMlr=50, PWMlf=50, PWMrr = 50, PWMrf=50;
-void lplus() {
+void lp() {
   PWMlr += 5;
   PWMlf += 5;
   if ( PWMlr > 255 ) {
@@ -166,7 +166,7 @@ void lplus() {
     PWMlf = 255;
   }
 }
-void rplus() {
+void rp() {
   PWMrr += 5;
   PWMrf += 5;
   if ( PWMrr > 255 ) {
@@ -176,7 +176,7 @@ void rplus() {
     PWMrf = 255;
   }
 }
-void lminus() {
+void lm() {
   PWMlr -= 5;
   PWMlf -= 5;
   if ( PWMlr < 0 ) {
@@ -186,7 +186,7 @@ void lminus() {
     PWMlf = 0;
   }
 }
-void rminus() {
+void rm() {
   PWMrr -= 5;
   PWMrf -= 5;
   if ( PWMrr < 0 ) {
@@ -197,11 +197,11 @@ void rminus() {
   }
 }
 
-void bminus() {
-  lminus(); rminus();
+void bm() {
+  lm(); rm();
 }
-void bplus() {
-  lplus(); rplus();
+void bp() {
+  lp(); rp();
 }
 
 void beq() {
