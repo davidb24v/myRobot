@@ -4,5 +4,11 @@ Arduino sketch to control an autonomous robot with a few sensors on board.
  - SR HC-04 Ultrasonic Sensor
  - DS18B20 1-wire temperature sensor
  - 2 x TB6612FNG motor drivers
+ - MCP23017 I/O Extender
+ 
+It's using a DFRobot Pirate 4WD Mobile Platform, wasn't sure if I could
+run this off a single TB6612FNG so I went ahead and used 2 anyway. That's
+why there's a MCP23017 in the mix too.
+
  
  
