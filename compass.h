@@ -2,7 +2,6 @@
 int HMC6352 = 0x21;
 
 unsigned long headingTimer = 0;
-unsigned int headingSpeed = 100;
 
 void printHeading(Hmc6352 compass) {
   compass.wake();

@@ -29,11 +29,14 @@ Hmc6352 hmc6352;
 // Command received from Raspberry Pi
 String command;
 
+// Polling interval for heading and distance
+int Speed = 100;
+
 // the setup routine runs once when you press reset:
 void setup() {
   
-//  Serial.begin(115200);
-  Serial.begin(9600);
+  Serial.begin(115200);
+//  Serial.begin(9600);
   
   setup_motors();
   
@@ -66,12 +69,12 @@ void loop() {
   // pingSpeed milliseconds since last ping, do another ping.
   if ( pingTimer && millis() >= pingTimer) {
     sonar.ping_timer(echoCheck); // Send out the ping
-    pingTimer += pingSpeed;      // Set the next ping time.
+    pingTimer += Speed;      // Set the next ping time.
   }
 
   if ( headingTimer && millis() >= headingTimer ) {
     printHeading(hmc6352);
-    headingTimer += headingSpeed;
+    headingTimer += Speed;
   }
   
   if ( LEDon && millis() >= LEDon ) {
@@ -140,7 +143,7 @@ void process_command() {
   else if (command == "pl") lp();	      // Add 5 to left PWM values
   else if (command == "pr") rp();	      //   to right
   else if (command == "pb") bp();	      //   to both
-  else if (command == "ml=") lm();        // subtract 5 from left PWM
+  else if (command == "ml") lm();        // subtract 5 from left PWM
   else if (command == "mr ") rm();        //   from right
   else if (command == "mb ") bm();        //   from both
   else if (command == "sl") lset();	       // set left PWM
@@ -173,8 +176,12 @@ void idle_mode() {
 }
 
 void scan_mode() {
+  // Fast scanning, speed up the LED
   LEDinterval = 100;
-  pingTimer = headingTimer = millis();
+  // Get heading as soon as possible
+  headingTimer = millis();
+  // Offset distance in time by half a "tick"
+  pingTimer = headingTimer + Speed/2;
 }
 
 void echoCheck() { // Timer2 interrupt calls this function every 24uS where you can check the ping status.
