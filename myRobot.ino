@@ -112,20 +112,21 @@ void loop() {
   }
         
   // turn off if haven't heard from pi for a while...
-  if ( millis()-lastContact > contactInterval) {
+/*  if ( millis()-lastContact > contactInterval) {
     lastContact = millis();
     bs();
     idle_mode();
   }
+*/
 }
 
 void process_command() {
-  if (command == "H") get_heading();             // query heading
-  else if (command == "D") get_distance();       // query distance sensor
-  else if (command == "V") get_voltage();        // query motor voltage
-  else if (command == "T") get_temperature();    // query motor voltage
-  else if (command == "S") scan_mode();       // Fast scanning distance/heading
-  else if (command == "I") idle_mode();       // Idle mode
+  if (command == "h") get_heading();             // query heading
+  else if (command == "d") get_distance();       // query distance sensor
+  else if (command == "v") get_voltage();        // query motor voltage
+  else if (command == "t") get_temperature();    // query motor voltage
+  else if (command == "s") scan_mode();       // Fast scanning distance/heading
+  else if (command == "i") idle_mode();       // Idle mode
   else if (command == "lf") lf();  //left forwards
   else if (command == "rf") rf();  //right forwards
   else if (command == "bf") bf();  //both forwards
@@ -138,8 +139,8 @@ void process_command() {
   else if (command == "ls") ls();	      //
   else if (command == "rs") rs();	      // stop
   else if (command == "bs") bs();	      //
-  else if (command == "CW") rotateCW();    // rotate clockwise
-  else if (command == "CCW") rotateCCW();  // rotate counter-clockwise
+  else if (command == "cw") rotateCW();    // rotate clockwise
+  else if (command == "ccw") rotateCCW();  // rotate counter-clockwise
   else if (command == "pl") lp();	      // Add 5 to left PWM values
   else if (command == "pr") rp();	      //   to right
   else if (command == "pb") bp();	      //   to both
