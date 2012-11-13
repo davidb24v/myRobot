@@ -25,6 +25,12 @@ void stepperWrite() {
   Wire.endTransmission();
 }
 
+void stepperOff() {
+  // switch off
+  stepperValueA &= 0x0F;
+  stepperWrite();
+}
+
 void checkStop() {
   // Set address pointer to bank B
   Wire.beginTransmission(0x21);
@@ -36,6 +42,8 @@ void checkStop() {
 }
 
 void ccw (){
+ int n;
+ for( n=0; n < nSteps; n++) {
   // 1
   stepperValueA &= 0x0F;
   stepperValueA |= 0b00010000;
@@ -76,6 +84,8 @@ void ccw (){
   stepperValueA |= 0b10010000;
   stepperWrite();
   delay(stepperSpeed);
+ }
+  stepperOff();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -83,6 +93,8 @@ void ccw (){
 //delay "stepperSpeed" between each pin setting (to determine speed)
 
 void cw(){
+ int n;
+ for( n=0; n < nSteps; n++) {
   // 1
   stepperValueA &= 0x0F;
   stepperValueA |= 0b10000000;
@@ -123,11 +135,43 @@ void cw(){
   stepperValueA |= 0b10010000;
   stepperWrite();
   delay(stepperSpeed);
+ }
+  stepperOff();
 }
 
-void stepperOff() {
-  // switch off
-  stepperValueA &= 0x0F;
-  stepperWrite();
+void calibrateStepper() {
+    pos = 0;
+  nSteps=1;
+  // step clockwise until stopPin goes low
+  for(;;) {
+    pos++;
+    cw();
+    checkStop();
+    if ( stopPin == 0 ) break;
+  }
+  cwPos = pos;
+  Serial.print("CW stop at pos = ");
+  Serial.println(pos, DEC);
+  
+  for(;;) {
+    pos--;
+    ccw();
+    checkStop();
+    if ( stopPin == 0 ) break;
+  }
+  ccwPos = pos;
+  Serial.print("CCW stop at pos = ");
+  Serial.println(pos, DEC);
+  
+  // step to centre
+  centrePos = (cwPos-ccwPos)/2;
+  if ( centrePos % 2 == 1 ) {
+    centrePos++;
+  }
+  for(int i=0; i < centrePos; i++) {
+    cw();
+  }
+  pos=centrePos;
+  Serial.print("Centred at pos = ");
+  Serial.println(pos, DEC);
 }
-

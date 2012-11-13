@@ -37,6 +37,7 @@ int stepperSpeed = 1;
 byte stepperValueA = 0;
 byte stopPin = 0;
 int cwPos, ccwPos, pos, centrePos;
+int nSteps = 1;
 #include "myStepper.h"
 
 // the setup routine runs once when you press reset:
@@ -63,39 +64,7 @@ void setup() {
   LEDoff = LEDon+LEDontime;
   
   // Calibrate sensor position
-  pos = 0;
-  // step clockwise until stopPin goes low
-  for(;;) {
-    pos++;
-    cw();
-    checkStop();
-    if ( stopPin == 0 ) break;
-  }
-  cwPos = pos;
-  Serial.print("CW stop at pos = ");
-  Serial.println(pos, DEC);
-  
-  for(;;) {
-    pos--;
-    ccw();
-    checkStop();
-    if ( stopPin == 0 ) break;
-  }
-  ccwPos = pos;
-  Serial.print("CCW stop at pos = ");
-  Serial.println(pos, DEC);
-  
-  // step to centre
-  centrePos = (cwPos-ccwPos)/2+9;
-  for(int i=0; i < centrePos; i++) {
-    cw();
-    pos++;
-  }
-  Serial.print("Centred at pos = ");
-  Serial.println(pos, DEC);
-  
-  delay(10);
-  stepperOff();
+  calibrateStepper();
   
 }
 
@@ -193,6 +162,7 @@ void process_command() {
   else if (command == "sr") rset();	       // set right
   else if (command == "sb") bset();	       // set both
   else if (command == "beq") beq();              // make left and right PWM equal
+  else if (command == "cs") calibrateStepper();  // what it says on the tin
 
   command = "";
 }
