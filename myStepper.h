@@ -41,106 +41,49 @@ void checkStop() {
   stopPin = Wire.read() && 1;
 }
 
-void ccw (){
- int n;
- for( n=0; n < nSteps; n++) {
-  // 1
-  stepperValueA &= 0x0F;
-  stepperValueA |= 0b00010000;
-  stepperWrite();
-  delay(stepperSpeed);
-  // 2
-  stepperValueA &= 0x0F;
-  stepperValueA |= 0b00110000;
-  stepperWrite();
-  delay (stepperSpeed);
-  // 3
-  stepperValueA &= 0x0F;
-  stepperValueA |= 0b00100000;
-  stepperWrite();
-  delay(stepperSpeed);
-  // 4
-  stepperValueA &= 0x0F;
-  stepperValueA |= 0b01100000;
-  stepperWrite();
-  delay(stepperSpeed);
-  // 5
-  stepperValueA &= 0x0F;
-  stepperValueA |= 0b01000000;
-  stepperWrite();
-  delay(stepperSpeed);
-  // 6
-  stepperValueA &= 0x0F;
-  stepperValueA |= 0b11000000;
-  stepperWrite();
-  delay (stepperSpeed);
-  // 7
-  stepperValueA &= 0x0F;
-  stepperValueA |= 0b10000000;
-  stepperWrite();
-  delay(stepperSpeed);
-  // 8
-  stepperValueA &= 0x0F;
-  stepperValueA |= 0b10010000;
-  stepperWrite();
-  delay(stepperSpeed);
- }
-  stepperOff();
-}
-
 //////////////////////////////////////////////////////////////////////////////
 //set pins to ULN2003 high in sequence from 4 to 1
 //delay "stepperSpeed" between each pin setting (to determine speed)
+void step(int b) {
+  stepperValueA &= 0x0F;
+  stepperValueA |= b;
+  stepperWrite();
+  delay(stepperSpeed);
+}
+
+void ccw (){
+ int n;
+ for( n=0; n < nSteps; n++) {
+    step(0b00010000);
+    step(0b00110000);
+    step(0b00100000);
+    step(0b01100000);
+    step(0b01000000);
+    step(0b11000000);
+    step(0b10000000);
+    step(0b10010000);
+  }
+  stepperOff();
+}
+
 
 void cw(){
  int n;
  for( n=0; n < nSteps; n++) {
-  // 1
-  stepperValueA &= 0x0F;
-  stepperValueA |= 0b10000000;
-  stepperWrite();
-  delay(stepperSpeed);
-  // 2
-  stepperValueA &= 0x0F;
-  stepperValueA |= 0b11000000;
-  stepperWrite();
-  delay (stepperSpeed);
-  // 3
-  stepperValueA &= 0x0F;
-  stepperValueA |= 0b01000000;
-  stepperWrite();
-  delay(stepperSpeed);
-  // 4
-  stepperValueA &= 0x0F;
-  stepperValueA |= 0b01100000;
-  stepperWrite();
-  delay(stepperSpeed);
-  // 5
-  stepperValueA &= 0x0F;
-  stepperValueA |= 0b00100000;
-  stepperWrite();
-  delay(stepperSpeed);
-  // 6
-  stepperValueA &= 0x0F;
-  stepperValueA |= 0b00110000;
-  stepperWrite();
-  delay (stepperSpeed);
-  // 7
-  stepperValueA &= 0x0F;
-  stepperValueA |= 0b00010000;
-  stepperWrite();
-  delay(stepperSpeed);
-  // 8
-  stepperValueA &= 0x0F;
-  stepperValueA |= 0b10010000;
-  stepperWrite();
-  delay(stepperSpeed);
- }
+   step(0b10000000);
+   step(0b11000000);
+   step(0b01000000);
+   step(0b01100000);
+   step(0b00100000);
+   step(0b00110000);
+   step(0b00010000);
+   step(0b10010000);
+  }
   stepperOff();
 }
 
 void calibrateStepper() {
-    pos = 0;
+  pos = 0;
   nSteps=1;
   // step clockwise until stopPin goes low
   for(;;) {
@@ -163,15 +106,23 @@ void calibrateStepper() {
   Serial.print("CCW stop at pos = ");
   Serial.println(pos, DEC);
   
+  // 
+  
   // step to centre
   centrePos = (cwPos-ccwPos)/2;
-  if ( centrePos % 2 == 1 ) {
-    centrePos++;
-  }
-  for(int i=0; i < centrePos; i++) {
+  if ( centrePos % 2 == 1 ) centrePos--;
+  
+  // force centre position to be zero
+  cwPos = centrePos;
+  ccwPos = -centrePos;
+  Serial.print("Width = ");
+  Serial.println(centrePos, DEC);
+  centrePos = 0;
+  
+  for(int i=ccwPos; i <= 0; i++) {
     cw();
   }
-  pos=centrePos;
+  pos=0;
   Serial.print("Centred at pos = ");
   Serial.println(pos, DEC);
 }
