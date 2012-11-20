@@ -33,11 +33,14 @@ String command;
 int Speed = 100;
 
 // Values for stepper motor
-int stepperSpeed = 1;
+int stepperSpeed = 500;  // now in microseconds
 byte stepperValueA = 0;
 byte stopPin = 0;
-int cwPos, ccwPos, pos, centrePos;
+int cwPos, ccwPos, centrePos;
+int pos = 0;
 int nSteps = 1;
+int stepperDir = 1;
+int stepMode = 0;
 #include "myStepper.h"
 
 // the setup routine runs once when you press reset:
@@ -73,12 +76,13 @@ void loop() {
   char ch;
   
   if ( haveDistance ) {
-    printDistance();
+    printDistance(pos);
     haveDistance = 0;
   }
   
   // pingSpeed milliseconds since last ping, do another ping.
   if ( pingTimer && millis() >= pingTimer) {
+    if (stepMode) doStep();
     sonar.ping_timer(echoCheck); // Send out the ping
     pingTimer += Speed;      // Set the next ping time.
   }
@@ -163,6 +167,8 @@ void process_command() {
   else if (command == "sb") bset();	       // set both
   else if (command == "beq") beq();              // make left and right PWM equal
   else if (command == "cs") calibrateStepper();  // what it says on the tin
+  else if (command == "scw") cw();               // step clockwise
+  else if (command == "sccw") ccw();               // step counter clockwise
 
   command = "";
 }
@@ -186,6 +192,8 @@ void get_temperature() {
 void idle_mode() {
   LEDinterval = 1000;
   pingTimer = headingTimer = 0;
+  stepMode = 0;
+  nSteps = 1;
 }
 
 void scan_mode() {
@@ -195,6 +203,9 @@ void scan_mode() {
   headingTimer = millis();
   // Offset distance in time by half a "tick"
   pingTimer = headingTimer + Speed/2;
+  // Indicate that we should move the HC SR-04 by 5 steps after each ping
+  stepMode = 1;
+  nSteps = 5;
 }
 
 void echoCheck() { // Timer2 interrupt calls this function every 24uS where you can check the ping status.

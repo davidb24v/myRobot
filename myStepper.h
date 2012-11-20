@@ -41,14 +41,11 @@ void checkStop() {
   stopPin = Wire.read() && 1;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-//set pins to ULN2003 high in sequence from 4 to 1
-//delay "stepperSpeed" between each pin setting (to determine speed)
 void step(int b) {
   stepperValueA &= 0x0F;
   stepperValueA |= b;
   stepperWrite();
-  delay(stepperSpeed);
+  delayMicroseconds(stepperSpeed);
 }
 
 void ccw (){
@@ -80,6 +77,30 @@ void cw(){
    step(0b10010000);
   }
   stepperOff();
+}
+
+void doStep() {
+  int p0, s0;
+
+  // save number of steps
+  s0 = nSteps;
+  
+  if (stepperDir > 0) {
+    p0 = pos + nSteps;
+    if ( p0 >= cwPos ) stepperDir = -1;
+    if ( p0 > cwPos )  nSteps = cwPos-pos;
+    cw();
+    pos += nSteps;
+  } else {
+    p0 = pos - nSteps;
+    if ( p0 <= ccwPos ) stepperDir = 1;
+    if ( p0 < ccwPos ) nSteps = pos-ccwPos;
+    ccw();
+    pos -= nSteps;
+  }
+  
+  // restore steps
+  nSteps = s0;
 }
 
 void calibrateStepper() {
