@@ -143,7 +143,11 @@ void calibrateStepper() {
   for(int i=ccwPos; i <= 0; i++) {
     cw();
   }
+  cw();cw();cw();cw();
+  cwPos += 4;
   pos=0;
   Serial.print("Centred at pos = ");
   Serial.println(pos, DEC);
+  Serial.println(cwPos);
+  Serial.println(ccwPos);
 }
