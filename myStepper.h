@@ -11,54 +11,38 @@
 // operating Frequency is 100pps. Current draw is 92mA.
 // speed when the potentiometer has been rotated fully clockwise.
 //
-// Modified use an MCP23017 to drive the stepper board
 ////////////////////////////////////////////////
 
 
 //set pins to ULN2003 high in sequence from 1 to 4
 //delay "stepperSpeed" between each pin setting (to determine speed)
 
-void stepperWrite() {
-  Wire.beginTransmission(0x21);
-  Wire.write(0x12);
-  Wire.write(stepperValueA);
-  Wire.endTransmission();
-}
-
 void stepperOff() {
   // switch off
-  stepperValueA &= 0x0F;
-  stepperWrite();
+  PORTC &= B11110000;
 }
 
 void checkStop() {
-  // Set address pointer to bank B
-  Wire.beginTransmission(0x21);
-  Wire.write(0x13);
-  Wire.endTransmission();
-  
-  Wire.requestFrom(0x21, 1);
-  stopPin = Wire.read() && 1;
+  stopPin = 1;
 }
 
 void step(int b) {
-  stepperValueA &= 0x0F;
-  stepperValueA |= b;
-  stepperWrite();
+  PORTC &= B11110000;
+  PORTC |= b;
   delayMicroseconds(stepperSpeed);
 }
 
 void ccw (){
  int n;
  for( n=0; n < nSteps; n++) {
-    step(0b00010000);
-    step(0b00110000);
-    step(0b00100000);
-    step(0b01100000);
-    step(0b01000000);
-    step(0b11000000);
-    step(0b10000000);
-    step(0b10010000);
+    step(0b0001);
+    step(0b0011);
+    step(0b0010);
+    step(0b0110);
+    step(0b0100);
+    step(0b1100);
+    step(0b1000);
+    step(0b1001);
   }
   stepperOff();
 }
@@ -67,14 +51,14 @@ void ccw (){
 void cw(){
  int n;
  for( n=0; n < nSteps; n++) {
-   step(0b10000000);
-   step(0b11000000);
-   step(0b01000000);
-   step(0b01100000);
-   step(0b00100000);
-   step(0b00110000);
-   step(0b00010000);
-   step(0b10010000);
+   step(0b1000);
+   step(0b1100);
+   step(0b0100);
+   step(0b0110);
+   step(0b0010);
+   step(0b0011);
+   step(0b0001);
+   step(0b1001);
   }
   stepperOff();
 }
@@ -104,6 +88,11 @@ void doStep() {
 }
 
 void calibrateStepper() {
+
+  // Use PORTC to set digital pins 14-17 (Analog 0-3) directly
+  // Setup these pins for output
+  DDRC &= B00001111;
+
   pos = 0;
   nSteps=1;
   // step clockwise until stopPin goes low
