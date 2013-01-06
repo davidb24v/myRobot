@@ -7,8 +7,17 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
+// PWM values
+#define INIT_PWM 200
+byte PWMlr=INIT_PWM, PWMlf=INIT_PWM, PWMrr = INIT_PWM, PWMrf=INIT_PWM;
+
 #include "motors.h"
 #include "voltage.h"
+
+// Compass calibration mode
+int ccMode = 0;
+int ccStart;
+
 #include "compass.h"
 #include "distance.h"
 #include "MCP23017.h"
@@ -74,6 +83,20 @@ void setup() {
 // the loop routine runs over and over again forever:
 void loop() {
   char ch;
+  
+  if ( ccMode ) {
+    if ( millis()-ccStart > 20001 ) {
+      // Send "E" to finish "user calibration"
+      Wire.beginTransmission(0x30);
+      Wire.write(0x45);
+      Wire.endTransmission();
+      bs();
+      PWMrr = PWMrf = PWMlr = PWMlf = INIT_PWM;
+      setpwm();
+      ccMode = 0;
+    }
+  }
+    
   
   if ( haveDistance ) {
     printDistance(pos);
@@ -167,10 +190,22 @@ void process_command() {
   else if (command == "sb") bset();	       // set both
   else if (command == "beq") beq();              // make left and right PWM equal
   else if (command == "cs") calibrateStepper();  // what it says on the tin
-  else if (command == "scw") cw();               // step clockwise
-  else if (command == "sccw") ccw();               // step counter clockwise
+  else if (command == "scw") {cw(); ++pos;}               // step clockwise
+  else if (command == "sccw") {ccw(); --pos;}               // step counter clockwise
+  else if (command == "CC") calibrate_compass();
 
   command = "";
+}
+
+void calibrate_compass() {
+  ccMode = 1;
+  ccStart = millis();
+  PWMrr = PWMrf = PWMlr = PWMlf = 60;
+  setpwm();
+//  rotateCW();
+  Wire.beginTransmission(0x30);
+  Wire.write(0x43);
+  Wire.endTransmission();
 }
 
 void get_heading() {

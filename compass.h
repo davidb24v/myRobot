@@ -13,4 +13,6 @@ void printHeading(Hmc6352 compass) {
   Serial.print(" ");
   Serial.println(tsHeading);
 }
+
+  
   

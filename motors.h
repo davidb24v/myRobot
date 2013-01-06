@@ -17,10 +17,6 @@
 #define PWM_rr 10
 #define PWM_rf 11
 
-// PWM values
-#define INIT_PWM 200
-byte PWMlr=INIT_PWM, PWMlf=INIT_PWM, PWMrr = INIT_PWM, PWMrf=INIT_PWM;
-
 // Current values for each motor
 byte LEFT = 0;
 byte RIGHT = 0;
@@ -36,6 +32,13 @@ void setup_motors() {
   pinMode(PWM_lf, OUTPUT);
   pinMode(PWM_rr, OUTPUT);
   pinMode(PWM_rf, OUTPUT);
+  analogWrite(PWM_lr, PWMlr);
+  analogWrite(PWM_lf, PWMlf);
+  analogWrite(PWM_rr, PWMrr);
+  analogWrite(PWM_rf, PWMrr);
+}
+
+void setpwm() {
   analogWrite(PWM_lr, PWMlr);
   analogWrite(PWM_lf, PWMlf);
   analogWrite(PWM_rr, PWMrr);
