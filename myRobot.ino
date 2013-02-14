@@ -3,10 +3,16 @@
 #include <NewPing.h>
 #include <Wire.h>
 #include <hmc6352.h>
+#include <MemoryFree.h>
 
-// PWM values
-#define INIT_PWM 200
-byte PWMlr=INIT_PWM, PWMlf=INIT_PWM, PWMrr = INIT_PWM, PWMrf=INIT_PWM;
+#include <SoftwareSerial.h>
+SoftwareSerial LEFT(6,8);
+SoftwareSerial RIGHT(5,7);
+char theMotor = '\0';
+int motorSpeed = 0;
+int leftSpeed = 0;
+int rightSpeed = 0;
+long lastMotorUpdate = 0;
 
 #include "motors.h"
 
@@ -16,7 +22,9 @@ int ccStart;
 
 #include "compass.h"
 #include "distance.h"
-#include "led.h"
+
+float heading;
+long tsHeading;
 
 int count = 0;
 
@@ -26,196 +34,193 @@ long contactInterval = 5000;
 // Setup ultrasonic sensor
 NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE);
 
-//set up hmc6352
-//Hmc6352 hmc6352;
+//set up hmc6352/
+Hmc6352 hmc6352;
 
 // Command received from Raspberry Pi
 String command;
+int nchars = 0;
 
 // Polling interval for heading and distance
-int Speed = 100;
+int Speed = 500;
 
 // Values for stepper motor
-int stepperSpeed = 800;  // now in microseconds
-byte stepperValueA = 0;
-byte stopPin = 0;
+int stepperSpeed = 750;  // now in microseconds
+#define STEPPER_DIR_PIN 13
+#define STEPPER_STEP_PIN 12
 int cwPos, ccwPos, centrePos;
 int pos = 0;
-int nSteps = 1;
-int stepperDir = 1;
-int stepMode = 0;
+int stopPin = 11;
 #include "myStepper.h"
+
+#include "blinkM.h"
 
 void setup() {
   
+  blinkM_off();
+  
   Serial.begin(115200);
   
-  setup_motors();
+  // setup motors
+  LEFT.begin(19200);
+  RIGHT.begin(19200);
   
-  // Switch on flashing LED 
-  pinMode(LEDpin,OUTPUT);
-  digitalWrite(LEDpin,LOW);
-  LEDon = millis();
-  LEDoff = LEDon+LEDontime;
-  
-  // Calibrate sensor position
-  calibrateStepper();
+  LEFT.write("A");
+  RIGHT.write("A");
   
 }
 
 // the loop routine runs over and over again forever:
 void loop() {
   char ch;
-  
+
+  if ( theMotor != '\0' && millis()-lastMotorUpdate > 200 ) {
+    set_motor_speed('L',leftSpeed);
+    set_motor_speed('R',rightSpeed);
+    lastMotorUpdate = millis();
+  }
+
   if ( ccMode ) {
     if ( millis()-ccStart > 20001 ) {
       // Send "E" to finish "user calibration"
       Wire.beginTransmission(0x30);
       Wire.write(0x45);
       Wire.endTransmission();
-      bs();
-      PWMrr = PWMrf = PWMlr = PWMlf = INIT_PWM;
-      setpwm();
+      // STOP MOTORS
       ccMode = 0;
     }
   }
-    
   
   if ( haveDistance ) {
-    printDistance(pos);
+    Serial.print(theDistance);
+    Serial.print(" ");
+    Serial.print(pos);
+    Serial.print(" ");
+    Serial.println(tsDistance);
     haveDistance = 0;
   }
   
-  // pingSpeed milliseconds since last ping, do another ping.
-  if ( pingTimer && millis() >= pingTimer) {
-    if (stepMode) doStep();
-    sonar.ping_timer(echoCheck); // Send out the ping
-    pingTimer += Speed;      // Set the next ping time.
-  }
-
-  if ( headingTimer && millis() >= headingTimer ) {
-//    printHeading(hmc6352);
-    headingTimer += Speed;
-  }
-  
-  if ( LEDon && millis() >= LEDon ) {
-    digitalWrite(LEDpin,HIGH);
-    LEDon += LEDinterval;
-  }
-  
-  if ( LEDoff && millis() >= LEDoff ) {
-    digitalWrite(LEDpin,LOW);
-    LEDoff = LEDon+LEDontime;
-  }
-  
-  // Check if any motors need stopping
-  if ( StopMotors && millis() >= StopMotors ) {
-    StopMotors = 0;
-    bs();
-  }
-  if ( StopLeftMotor && millis() >= StopLeftMotor ) {
-    StopLeftMotor = 0;
-    ls();
-  }
-  if ( StopRightMotor > 0 && millis() >= StopRightMotor ) {
-    StopRightMotor = 0;
-    rs();
-  }
-  
   if (Serial.available() > 0) {
-    lastContact = millis();
     ch = Serial.read();
     if (String(ch) == "\n") {
       process_command();
+      command = "";
+      nchars = 0;
     } else {
       command += ch;
+      nchars++;
+      if ( nchars > 10 ) {
+        command = "";
+        nchars = 0;
+      }
     }
   }
-        
-  // turn off if haven't heard from pi for a while...
-/*  if ( millis()-lastContact > contactInterval) {
-    lastContact = millis();
-    bs();
-    idle_mode();
+}
+
+void motorCmd(char motor) {
+  int dir, value;
+
+  if ( command.charAt(1) == '-' ) dir = -1;
+  else dir = 1;
+  
+  value = 0;
+  for (int n=2; n < 5; n++) {
+    value *= 10;
+    value += command.charAt(n)-'0';
   }
-*/
+  
+  value *= dir;
+  value = max(-255,min(value,255));
+  
+  theMotor = motor;
+  motorSpeed = value;
+  setSpeed(motor,value);
 }
-
+  
 void process_command() {
-  if (command == "h") get_heading();             // query heading
-  else if (command == "d") get_distance();       // query distance sensor
-  else if (command == "s") scan_mode();       // Fast scanning distance/heading
-  else if (command == "i") idle_mode();       // Idle mode
-  else if (command == "lf") lf();  //left forwards
-  else if (command == "rf") rf();  //right forwards
-  else if (command == "bf") bf();  //both forwards
-  else if (command == "lr") lr();    //
-  else if (command == "rr") rr();    // reverse
-  else if (command == "br") br();    //
-  else if (command == "lb") lb();	     //
-  else if (command == "rb") rb();	     // brake
-  else if (command == "bb") bb();	     //
-  else if (command == "ls") ls();	      //
-  else if (command == "rs") rs();	      // stop
-  else if (command == "bs") bs();	      //
-  else if (command == "cw") rotateCW();    // rotate clockwise
-  else if (command == "ccw") rotateCCW();  // rotate counter-clockwise
-  else if (command == "pl") lp();	      // Add 5 to left PWM values
-  else if (command == "pr") rp();	      //   to right
-  else if (command == "pb") bp();	      //   to both
-  else if (command == "ml") lm();        // subtract 5 from left PWM
-  else if (command == "mr ") rm();        //   from right
-  else if (command == "mb ") bm();        //   from both
-  else if (command == "sl") lset();	       // set left PWM
-  else if (command == "sr") rset();	       // set right
-  else if (command == "sb") bset();	       // set both
-  else if (command == "beq") beq();              // make left and right PWM equal
-  else if (command == "cs") calibrateStepper();  // what it says on the tin
-  else if (command == "scw") {cw(); ++pos;}               // step clockwise
-  else if (command == "sccw") {ccw(); --pos;}               // step counter clockwise
-  else if (command == "CC") calibrate_compass();
+  if (command.charAt(0) == 'L' && nchars==5) { 
+    motorCmd('L');
+    leftSpeed = motorSpeed;
+  }  else if (command.charAt(0) == 'R' && nchars==5) {
+    motorCmd('R');
+    rightSpeed = motorSpeed;
+  }  else if (command.charAt(0) == 'B' && nchars==5) { 
+    motorCmd('B');
+    leftSpeed = motorSpeed;
+    rightSpeed = motorSpeed;
+  } else if (command == "CS") {
+    calibrateStepper();
+  } else if (command == "free") {
+    Serial.println(freeRam());
+  }  else if (command == "SP") {
+    int newPos = readInt();
+    setPos(newPos);
+  }  else if (command == "led") {
+    int r = readInt();
+    int g = readInt();
+    int b = readInt();
+    blinkM_set_rgb_colour(r,g,b);
+  }  else if (command == "ms") {
+    Serial.println(millis());
+  } else if ( command == "h" | command == "H" ) {
+    hmc6352.wake();
+    heading = hmc6352.getHeading();
+    hmc6352.sleep();
+    tsHeading = millis();
+    Serial.print(heading);
+    Serial.print(" ");
+    Serial.println(tsHeading);
+  } else if ( command == "p" ) {
+    sonar.ping_timer(echoCheck); // Send out the ping
+  } else if ( command == "P" ) {
+    int newPos = readInt();
+    setPos(newPos);
+    sonar.ping_timer(echoCheck); // Send out the ping
+  } else if ( command == "idle" ) {
+    blinkM_idle();
+  } else if ( command == "off" ) {
+    blinkM_off();
+  } else if ( command == "amber" ) {
+    blinkM_orange_flash();
+    Serial.println("arduino amber command");
+  }
+}
 
+int readInt() {
   command = "";
+  nchars = 0;
+  char ch;
+  for(;;) {
+    if ( Serial.available() > 0 ) {
+      ch = Serial.read();
+      if ( ch == '\n' ) {
+        break;
+      }
+      command += ch;
+      nchars++;
+    }
+  }
+  int value = 0;
+  int start = 0;
+  int sign = 1;
+  if ( command[0] == '-' ) {
+    start = 1;
+    sign = -1;
+  }
+  for (int i=start; i < nchars; i++) {
+    value *= 10;
+    value += command[i]-'0';
+  }
+  value *= sign;
+  command = "";
+  nchars = 0;
+  return value;
 }
 
-void calibrate_compass() {
-  ccMode = 1;
-  ccStart = millis();
-  PWMrr = PWMrf = PWMlr = PWMlf = 60;
-  setpwm();
-  rotateCW();
-  Wire.beginTransmission(0x30);
-  Wire.write(0x43);
-  Wire.endTransmission();
+void setSpeed(char motor, int speed) {
+  set_motor_speed(motor,speed);
 }
-
-void get_heading() {
-//  printHeading(hmc6352);
-}
-
-void get_distance() {
-  sonar.ping_timer(echoCheck);
-}
-
-void idle_mode() {
-  LEDinterval = 1000;
-  pingTimer = headingTimer = 0;
-  stepMode = 0;
-  nSteps = 1;
-}
-
-void scan_mode() {
-  // Fast scanning, speed up the LED
-  LEDinterval = 100;
-  // Get heading as soon as possible
-  headingTimer = millis();
-  // Offset distance in time by half a "tick"
-  pingTimer = headingTimer + Speed/2;
-  // Indicate that we should move the HC SR-04 by 5 steps after each ping
-  stepMode = 1;
-  nSteps = 5;
-}
-
+   
 void echoCheck() { // Timer2 interrupt calls this function every 24uS where you can check the ping status.
   // Don't do anything here!
   if (sonar.check_timer()) { // This is how you check to see if the ping was received.
@@ -227,4 +232,8 @@ void echoCheck() { // Timer2 interrupt calls this function every 24uS where you 
   // Don't do anything here!
 }
 
-
+int freeRam () {
+  extern int __heap_start, *__brkval; 
+  int v; 
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
+}
