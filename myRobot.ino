@@ -48,7 +48,7 @@ THE SOFTWARE.
 #include <I2Cdev.h>
 #include <MemoryFree.h>
 
-#include <MPU6050_6Axis_MotionApps20.h>
+#include "MPU6050_6Axis_MotionApps20.h"
 
 // Ultrasonic sensor on pin 10
 #include <NewPing.h>
