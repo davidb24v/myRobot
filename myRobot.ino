@@ -46,6 +46,7 @@ THE SOFTWARE.
 // I2Cdev and MPU6050 must be installed as libraries, or else the .cpp/.h files
 // for both classes must be in the include path of your project
 #include <I2Cdev.h>
+#include <MemoryFree.h>
 
 #include <MPU6050_6Axis_MotionApps20.h>
 
@@ -180,7 +181,7 @@ void motorCmd(char motor) {
   
   value *= dir;
   value = max(-255,min(value,255));
-  
+
   theMotor = motor;
   motorSpeed = value;
   setSpeed(motor,value);
@@ -446,4 +447,3 @@ void loop() {
         digitalWrite(LED_PIN, blinkState);
     }
 }
-

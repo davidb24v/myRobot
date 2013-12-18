@@ -148,7 +148,6 @@ void blinkM_red_flash() {
   blinkM_play_script(0,0);
 }
 
-
 //  Green light
 blinkm_script_line idle_fade[] = {
   {  1,  {'f',   5,  00,  00}},  // set fade speed
