@@ -9,8 +9,10 @@ import Robot
 def pause():
     time.sleep(0.1)
 
-robot = Robot.Arduino("/dev/ttyACM0")
+robot = Robot.Arduino("/dev/ttyAMA0")
+#robot = Robot.Arduino("/dev/ttyACM0")
 #robot = Robot.Arduino("/dev/ttyUSB0")
+robot.idle()
 robot.bothMotors(0)
 pause()
 robot.idle()
@@ -26,10 +28,10 @@ def signal_handler(signal, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 # Load a guidance module
-control = Robot.Avoid(robot,speed=150,threshold=10)
+#control = Robot.Avoid(robot,speed=150,threshold=10)
 
-control.start()
-#robot.amber()
+#control.start()
+robot.amber()
 while True:
     print robot.yaw()
     time.sleep(0.5)
