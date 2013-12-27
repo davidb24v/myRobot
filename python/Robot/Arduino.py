@@ -1,7 +1,7 @@
 
 import serial
-import io
 import time
+import subprocess
 
 class Arduino:
     """
@@ -23,18 +23,17 @@ class Arduino:
             Exception('fatal','device not specified')
         
         # open the port
-        ser = serial.Serial(port=self.device,baudrate=115200,
+        ser = serial.Serial(port=self.device,baudrate=57600,
                             timeout=0.05,
                             bytesize=8, parity='N', stopbits=1)
         self.ser = ser
-        self.io = io.TextIOWrapper(io.BufferedRWPair(ser,ser))
+        ser.setTimeout = 0.1
         print "Opened Arduino on port " + device
         
         # reset
-        ser.setDTR(False)
-        time.sleep(0.04)
-        ser.setDTR(True)
-        time.sleep(2)
+        subprocess.call('/home/pi/gertduino/reset')
+        #subprocess.call('/usr/local/bin/ard-reset-arduino')
+        time.sleep(2.0)
         
         self.leftSpeed = 0
         self.rightSpeed = 0
@@ -47,13 +46,13 @@ class Arduino:
             print test
 
     def write(self,s):
-        self.io.write(unicode(str(s)+"\n"))
-        self.io.flush()
+        self.ser.write(unicode(str(s)+"\n"))
+        self.ser.flush()
     
     # blocking read
     def readln(self):
         while True:
-            result = self.io.readline()
+            result = self.ser.readline()
             if result:
                 break
         return result.strip()
@@ -61,7 +60,7 @@ class Arduino:
     # non-blocking read
     def read(self):
         try:
-            result = self.io.readline()
+            result = self.ser.readline()
         except IOError as e:
             print "I/O error({0}): {1}".format(e.errno, e.strerror)
             result = "NAK"
@@ -123,20 +122,4 @@ class Arduino:
         self.write("B"+self.formatSpeed(speed))
         self.leftSpeed = speed
         self.rightSpeed = speed
-
-    def off(self):
-        self.write("off")
-
-    def idle(self):
-        self.write("idle")
-
-    def amber(self):
-        self.write("amber")
-
-    def red(self):
-        self.write("red")
-
-    def redblue(self):
-        self.write("redblue")
-
 

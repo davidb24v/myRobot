@@ -92,8 +92,6 @@ NewPing sonar[SONAR_NUM] = {
 String command;
 int nchars = 0;
 
-#include "blinkM.h"
-
 int freeRam () {
   extern int __heap_start, *__brkval; 
   int v; 
@@ -244,14 +242,9 @@ void process_command() {
     rightSpeed = motorSpeed;
   } else if (command == "free") {
     Serial.println(freeRam());
-  }  else if (command == "led") {
-    int r = readInt();
-    int g = readInt();
-    int b = readInt();
-    blinkM_set_rgb_colour(r,g,b);
   }  else if (command == "ms") {
     Serial.println(millis());
-  } else if ( command == "p" | command == "P" ) {
+  } else if ( (command == "p") | (command == "P") ) {
     byte sensor = readInt();
     if ( sensor != currentSensor ) sonar[currentSensor].timer_stop();
     currentSensor = sensor;
@@ -259,16 +252,6 @@ void process_command() {
   } else if ( command == "yaw" ) {
     Serial.println(yaw);
     yaw = 0.0;
-  } else if ( command == "idle" ) {
-    blinkM_idle();
-  } else if ( command == "off" ) {
-    blinkM_off();
-  } else if ( command == "amber" ) {
-    blinkM_orange_flash();
-  } else if ( command == "red" ) {
-    blinkM_red_flash();
-  } else if ( command == "redblue" ) {
-    blinkM_redblue_flash();
   }
 }
 // ================================================================
@@ -282,11 +265,9 @@ void setup() {
     // initialize serial communication
     // (115200 chosen because it is required for Teapot Demo output, but it's
     // really up to you depending on your project)
-    Serial.begin(115200);
+    Serial.begin(57600);
     while (!Serial); // wait for Leonardo enumeration, others continue immediately
 
-    blinkM_off();
-  
     // setup motors
     LEFT.begin(19200);
     RIGHT.begin(19200);

@@ -66,7 +66,6 @@ class Avoid:
     def __compute(self):
         # if all readings too close for comfort, spin around for a bit
         if self.d.min() < self.threshold:
-            self.robot.redblue()
             self.robot.bothMotors(0)
             print "REVERSE"
             self.robot.bothMotors(-100)
@@ -87,7 +86,6 @@ class Avoid:
                 else:
                     self.d[i] = self.nodistance
             print "CONTINUE"
-            self.robot.amber()
             return
         
         # Repulsion
@@ -112,6 +110,6 @@ class Avoid:
         right = int(self.speed*sin(heading-pi/4))
         self.robot.leftMotor(left)
         print "heading: "+str(heading*180/pi), self.d, left, right
-        print self.orbot.yaw()
+        print self.robot.yaw()
         time.sleep(0.01)
         self.robot.rightMotor(right)
