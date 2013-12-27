@@ -22,7 +22,10 @@ def signal_handler(signal, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 # Load a guidance module
-control = Robot.SLAM(robot)
+try:
+    control = Robot.SLAM(robot)
+except:
+    robot.bothMotors(0)
+    raise
 
-control.start()
 
