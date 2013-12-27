@@ -38,6 +38,18 @@ class Arduino:
         self.leftSpeed = 0
         self.rightSpeed = 0
         
+        # Number of sonar sensors
+        self.numSonar = 5
+        
+        # Sonar order
+        self.sonarMap =[4, 2, 0, 1, 3]
+        
+        # Sonar angles
+        self.sonarAngles = [-60.0, -30.0, 0.0, 30.0, 60.0]
+        
+        # Make sure motors are off
+        self.bothMotors(0)
+        
         # wait for "READY"
         print "Waiting for MPU-6050 yaw to settle..."
         test = ""
@@ -71,34 +83,18 @@ class Arduino:
     # Yaw from MPU-6050
     def yaw(self):
         self.write("yaw")
-        return self.readln()
+        try:
+            return float(self.readln())
+        except:
+            return 0.0
         
     # HC SR-04 range finders
     def ping(self,sensor):
+        sonar = self.sonarMap[sensor]
         self.write("P")
-        self.write(sensor)
+        self.write(sonar)
         result = self.read()
         return result.split()
-        
-    # Report number of sensors
-    def numSonar(self):
-        return 5
-        
-    # return angle of each sensor
-    def angle(self,sensor):
-        if sensor == 0:
-            return 0
-        elif sensor == 1:
-            return -30
-        elif sensor == 2:
-            return 30
-        elif sensor == 3:
-            return -60
-        elif sensor == 4:
-            return 60
-        else:
-            Exception("Invalid sensor number")
-
         
     # format speed value
     def formatSpeed(self,speed):
@@ -108,12 +104,12 @@ class Arduino:
             return ' %03d\n' % speed
         
     # motor speed control
-    def leftMotor(self,speed):
+    def leftMotors(self,speed):
         if speed <> self.leftSpeed:
             self.write("L"+self.formatSpeed(speed))
             self.leftSpeed = speed
 
-    def rightMotor(self,speed):
+    def rightMotors(self,speed):
         if speed <> self.rightSpeed:
             self.write("R"+self.formatSpeed(speed))
             self.rightSpeed = speed

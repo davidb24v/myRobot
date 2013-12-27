@@ -64,7 +64,12 @@ class Avoid:
         self.__compute()
                 
     def __compute(self):
+        # Fix naff values
+        problems = self.d <= 10.0
+        self.d[problems] = self.nodistance
+        
         # if all readings too close for comfort, spin around for a bit
+        print self.d, self.d.min(), self.threshold
         if self.d.min() < self.threshold:
             self.robot.bothMotors(0)
             print "REVERSE"

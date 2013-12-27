@@ -22,7 +22,7 @@ def signal_handler(signal, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 # Load a guidance module
-control = Robot.Avoid(robot,speed=150,threshold=10)
+control = Robot.SLAM(robot)
 
 control.start()
 
