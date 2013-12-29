@@ -18,8 +18,7 @@ class SLAM:
         self.nDir = robot.numSonar
         
         # Sonar angles, in radians
-        self.d2r = np.pi/180.0
-        self.sonarRadians = np.array(robot.sonarAngles)*self.d2r
+        self.sonarRadians = np.radians(np.array(robot.sonarAngles))
         
         # save motor speed factor
         self.speed = speed
@@ -36,20 +35,80 @@ class SLAM:
         # track our angle
         self.angle = 0.0
         
+        # Run through the sonar sensors
+        self.__startSonar()
+        
+        # Calibration
+        self.calibrate(2)
+        #return
+        
+        # Experiment with forward/reverse motion
+        self.move(2,30.0)
+        time.sleep(2.0)
+        self.move(2,40.0)
+        time.sleep(2.0)
+        self.move(2,60)
+        time.sleep(1)
+        self.move(2,10)
+        return
+        
         # Do a 360
         self.rotate(-360)
+        
+    def __startSonar(self):
+        for sonar in range(self.nDir):
+            self.robot.ping(sonar)
+            self.robot.ping(sonar)
+            
+        
+    def move(self, sonar, distance, speed=50):
+        dist = None
+        while not dist:
+            dist = self.robot.ping(sonar)
+        print "initial dist = ",dist
+        dist = float(dist[0])-distance
+
+        spd = np.sign(dist)*speed
+        left = right = spd
+        dist = abs(dist)
+        self.robot.bothMotors(spd)
+        yaw = 0.0
+        while True:
+            dist = None
+            while not dist:
+                dist = self.robot.ping(sonar)
+            print "dist = ", dist
+            dist = float(dist[0])-distance
+            #yaw += self.robot.yaw()
+            print dist, yaw, math.sin(np.radians(yaw))
+            if spd < 0:
+                if dist >= 0.0:
+                    break
+            else:
+                if dist <= 0.0:
+                    break
+        self.robot.bothMotors(0)
+                
         
     def ping(self, sonar):
         dist = self.robot.ping(sonar)
         self.angle += self.robot.yaw()
+        angle = np.radians(self.angle)
         if dist:
             d = float(dist[0])
-            theta = np.pi/2.0-self.d2r*self.angle-self.sonarRadians[sonar]
+            theta = np.pi/2.0-angle-self.sonarRadians[sonar]
             x = d*math.cos(theta)
             y = d*math.sin(theta)
         else:
             x = y = np.NaN
         return np.array([x, y])
+        
+    def calibrate(self, sonar):
+        for i in range(5):
+            self.robot.ping(sonar)
+        for i in range(50):
+            print self.robot.ping(sonar)
+        
 
     def scan(self):
         d = np.zeros(self.robot.numSonar)

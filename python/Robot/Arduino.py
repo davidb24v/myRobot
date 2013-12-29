@@ -45,7 +45,7 @@ class Arduino:
         self.sonarMap =[4, 2, 0, 1, 3]
         
         # Sonar angles
-        self.sonarAngles = [-60.0, -30.0, 0.0, 30.0, 60.0]
+        self.sonarAngles = [-55.0, -30.0, 0.0, 30.0, 55.0]
         
         # Make sure motors are off
         self.bothMotors(0)
